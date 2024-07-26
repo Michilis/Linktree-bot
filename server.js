@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const TelegramBot = require('node-telegram-bot-api');
+const path = require('path');
 const messages = require('./messages');
 const db = require('./db');
 
@@ -10,16 +11,17 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize database
 db.initDb();
 
 app.get('/', (req, res) => {
-  res.send('Linktree Bot Web App');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // User profile routes
-app.post('/profile', async (req, res) => {
+app.post('/api/profile', async (req, res) => {
   const { username, links } = req.body;
   try {
     await db.insertProfile(username, links);
@@ -29,7 +31,7 @@ app.post('/profile', async (req, res) => {
   }
 });
 
-app.put('/profile/:username', async (req, res) => {
+app.put('/api/profile/:username', async (req, res) => {
   const { username } = req.params;
   const { links } = req.body;
   try {
